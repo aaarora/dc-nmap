@@ -25,7 +25,7 @@ class AlertBot(discord.Client):
     def __init__(self, mac, channel_id, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.bg_task = self.send_alert.start()
-        self.mac = mac
+        self.mac = mac.values()
         self.channel_id = channel_id
 
     async def on_ready(self):
@@ -36,11 +36,12 @@ class AlertBot(discord.Client):
         at_home = False
         scan = nm.scan('192.168.1.0/24', arguments='-n -sP -PE -T5')
         channel = self.get_channel(self.channel_id)
-        if (not at_home) and (self.mac in flatten_dict(scan).values()):
-            await channel.send('UH OH')
-            at_home = True
-        if (self.mac not in flatten_dict(scan).values()):
-            at_home = False
+        for mac in self.mac:
+            if (not at_home) and (mac in flatten_dict(scan).values()):
+                await channel.send('UH OH')
+                at_home = True
+            if (mac not in flatten_dict(scan).values()):
+                at_home = False
 
     @send_alert.before_loop
     async def before_my_task(self):
