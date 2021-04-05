@@ -1,5 +1,6 @@
-#!usr/bin/python3
+#!/home/aashay/discord-alertbot/disc/bin/python
 import discord
+from discord.ext import tasks
 import json
 import nmap
 import asyncio
@@ -23,25 +24,27 @@ def flatten_dict(dd, separator='_', prefix=''):
 class AlertBot(discord.Client):
     def __init__(self, mac, channel_id, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.bg_task = self.loop.create_task(self.send_alert())
+        self.bg_task = self.send_alert.start()
         self.mac = mac
         self.channel_id = channel_id
 
     async def on_ready(self):
         print(f'{self.user} is now connected to {self.guilds[0]}')
 
+    @tasks.loop(seconds=300)
     async def send_alert(self):
-        await self.wait_until_ready()
         at_home = False
         scan = nm.scan('192.168.1.0/24', arguments='-n -sP -PE -T5')
         channel = self.get_channel(self.channel_id)
-        while not self.is_closed():
-            if (not at_home) and (self.mac in flatten_dict(scan).values()):
-                await channel.send('UH OH')
-                at_home = True
-            if (self.mac not in flatten_dict(scan).values()):
-                at_home = False
-            await asyncio.sleep(120)
+        if (not at_home) and (self.mac in flatten_dict(scan).values()):
+            await channel.send('UH OH')
+            at_home = True
+        if (self.mac not in flatten_dict(scan).values()):
+            at_home = False
+
+    @send_alert.before_loop
+    async def before_my_task(self):
+        await self.wait_until_ready()
 
 if __name__ == "__main__":
     conf = json.load(open('config.json'))
