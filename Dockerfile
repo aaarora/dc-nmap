@@ -1,16 +1,12 @@
 FROM ubuntu:latest
 
-COPY requirements.txt ./
+COPY requirements.txt config.json bot.py ./
 
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get -y install python3 && \
+RUN apt-get -y update && \
+    apt-get -y upgrade && \
+    apt-get -y install python3 && \
     apt-get -y install python3-pip && \
-    apt-get -y install nmap
+    apt-get -y install nmap && \
+    pip3 install -r requirements.txt
 
-RUN pip3 install -r requirements.txt
-
-COPY config.json ./
-COPY bot ./
-
-CMD ["/usr/bin/bash", "-c", "./bot"]
+CMD ["/usr/bin/bash", "-c", "./bot.py"]

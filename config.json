@@ -1,5 +1,5 @@
 {
     "TOKEN": "",
-    "mac": "",
+    "mac": {"ID": "MAC"},
     "channel_id": ""
 }
