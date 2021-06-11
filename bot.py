@@ -39,7 +39,6 @@ class AlertBot(discord.Client):
     scan = self.scanner.scan('192.168.0.0/24', arguments='-n -sP -PE -T5')
     channel = self.get_channel(self.channel_id)
     connected_device_mac = self.mac_in_scan(scan)
-    print(connected_device_mac)
     for device in self.mac:
       if (not self.at_home) and (self.mac[device] in connected_device_mac):
         await channel.send(f'{device} Just Connected')
